@@ -26,9 +26,12 @@ import {
   dayLabel,
   tally,
   ranking,
-} from "./logic.js";
+  encodeMask,
+  decodeMask,
+  mapDays,
+} from "./logic.js?v=1.3.0"; // ?v= は古いキャッシュと混ざらないための指定。版を上げたら合わせる
 
-const VERSION = "ver.1.2.1";
+const VERSION = "ver.1.3.0";
 const HISTORY_KEY = "sc_history"; // 開いた日程調整の履歴
 const NAME_KEY = "sc_name_"; // 最後に使った名前（後ろにアカウントのuidを付ける）
 
@@ -70,14 +73,14 @@ function demoSeed() {
     const days = {};
     dates.forEach((d, i) => {
       const m = pattern[i % pattern.length];
-      if (m) days[d] = m;
+      if (m) days[d] = encodeMask(m);
     });
     return { uid, name, days };
   };
   demoStore.responses = [
-    mk("d1", "さくら", [31, 24, 28, 0, 16]),
-    mk("d2", "けんた", [28, 31, 16, 24, 0]),
-    mk("d3", "みお", [24, 16, 31, 28, 24]),
+    mk("d1", "さくら", [63, 48, 60, 0, 32]),
+    mk("d2", "けんた", [60, 63, 32, 56, 0]),
+    mk("d3", "みお", [48, 32, 63, 60, 56]),
   ];
 }
 
@@ -284,7 +287,9 @@ function rememberHistory(id, s) {
 }
 
 function onResponses(list) {
-  responses = list.slice().sort((a, b) => String(a.name).localeCompare(String(b.name), "ja"));
+  responses = list
+    .map((r) => ({ ...r, days: mapDays(r.days, decodeMask) })) // 保存形式 → 画面用
+    .sort((a, b) => String(a.name).localeCompare(String(b.name), "ja"));
   const mine = responses.find((r) => r.uid === myUid);
   if (mine && !dirty) {
     draft = { name: mine.name, days: { ...(mine.days || {}) } };
@@ -371,7 +376,7 @@ $("btn-save").addEventListener("click", async () => {
       const m = (draft.days[d] || 0) & ALL_MASK;
       if (m) days[d] = m;
     });
-    await backend.saveResponse(scheduleId, { name, days });
+    await backend.saveResponse(scheduleId, { name, days: mapDays(days, encodeMask) });
     lsSet(NAME_KEY + myUid, name);
     draft.name = name;
     dirty = false;

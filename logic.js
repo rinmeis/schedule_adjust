@@ -1,12 +1,35 @@
 /* 日程調整アプリ: 画面に依存しない純粋なロジック（node単体でテストできる） */
 
-export const SLOTS = ["3限", "4限", "5限", "21時以降", "23時以降"];
-export const ALL_MASK = (1 << SLOTS.length) - 1; // 0b11111
+export const SLOTS = ["3限", "4限", "5限", "19時以降", "21時以降", "23時以降"];
+export const ALL_MASK = (1 << SLOTS.length) - 1; // 0b111111
+
+/* 保存データのビット位置（SLOTSと同じ並び順で指定する）。
+   19時以降は後から追加したので bit5 を使う。こうすると、追加前に保存された
+   回答の 21時以降(bit3)・23時以降(bit4) がずれない。 */
+const STORE_BIT = [0, 1, 2, 5, 3, 4];
+
+/* 画面用のマスク（bit順＝表示順）→ 保存用の値 */
+export function encodeMask(mask) {
+  return STORE_BIT.reduce((out, bit, i) => (mask & (1 << i) ? out | (1 << bit) : out), 0);
+}
+/* 保存用の値 → 画面用のマスク */
+export function decodeMask(stored) {
+  return STORE_BIT.reduce((out, bit, i) => (stored & (1 << bit) ? out | (1 << i) : out), 0);
+}
+/* {日付: 値} をまとめて変換する。0になる日は含めない */
+export function mapDays(days, convert) {
+  const out = {};
+  for (const [date, value] of Object.entries(days || {})) {
+    const v = convert(value);
+    if (v) out[date] = v;
+  }
+  return out;
+}
 export const MAX_DAYS = 31;
 const WEEK = ["日", "月", "火", "水", "木", "金", "土"];
 
 /* あるボタンを押したときの新しい選択状態を返す。
-   選択状態は5ビットのマスク（bit0=3限 … bit4=23時以降）。
+   選択状態は画面用の6ビットのマスク（bit0=3限 … bit5=23時以降）。
    - 押したボタンが未選択 → そのボタンとそれ以降をすべて選択
    - 押したボタンが選択済み → そのボタンとそれ以降をすべて解除 */
 export function toggleSlot(mask, i) {
