@@ -28,7 +28,7 @@ import {
   ranking,
 } from "./logic.js";
 
-const VERSION = "ver.1.2.0";
+const VERSION = "ver.1.2.1";
 const HISTORY_KEY = "sc_history"; // 開いた日程調整の履歴
 const NAME_KEY = "sc_name_"; // 最後に使った名前（後ろにアカウントのuidを付ける）
 
