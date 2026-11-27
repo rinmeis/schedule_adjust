@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="日程調整" />
+    <title>日程調整</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <h1 id="header-title">日程調整</h1>
+        <span class="header-ver" id="header-ver"></span>
+      </div>
+
+      <div class="account" id="account" hidden>
+        <span id="account-name"></span>
+        <button class="btn ghost" id="btn-logout">ログアウト</button>
+      </div>
+
+      <!-- ローディング -->
+      <div id="screen-loading" class="screen active">
+        <div class="loading-text">読み込み中…</div>
+      </div>
+
+      <!-- ログイン -->
+      <div id="screen-login" class="screen">
+        <div class="card">
+          <h2>Googleでログイン</h2>
+          <p class="hint">
+            使うにはGoogleアカウントでのログインが必要です。同じアカウントなら、別の端末からも回答を直せます。メールアドレスは他のメンバーに表示されません。
+          </p>
+          <p class="warn" id="inapp-note" hidden>
+            このアプリ内ブラウザではログインできません。URLをコピーして、SafariかChromeで開いてください。
+          </p>
+          <p class="error" id="login-error"></p>
+          <div class="login-actions">
+            <button class="btn primary" id="btn-login">Googleでログイン</button>
+            <button class="btn" id="btn-copy-login" hidden>このページのURLをコピー</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ホーム: 新しい日程調整を作る -->
+      <div id="screen-home" class="screen">
+        <div class="card">
+          <h2>新しい日程調整</h2>
+          <label class="field">
+            <span>タイトル</span>
+            <input id="in-title" type="text" maxlength="30" placeholder="同窓会の打ち合わせ" />
+          </label>
+          <div class="field-row">
+            <label class="field">
+              <span>開始日</span>
+              <input id="in-start" type="date" />
+            </label>
+            <label class="field">
+              <span>終了日</span>
+              <input id="in-end" type="date" />
+            </label>
+          </div>
+          <p class="hint">期間は最大31日間です。</p>
+          <p class="error" id="home-error"></p>
+          <button class="btn primary" id="btn-create">作成してURLを発行</button>
+        </div>
+        <div class="card" id="history-card" hidden>
+          <h2>これまでの日程調整</h2>
+          <div id="history-list"></div>
+        </div>
+      </div>
+
+      <!-- 日程調整の画面 -->
+      <div id="screen-schedule" class="screen">
+        <div class="share-bar">
+          <button class="btn" id="btn-copy">URLをコピー</button>
+          <button class="btn" id="btn-share" hidden>共有</button>
+          <button class="btn ghost" id="btn-home">ホームへ</button>
+        </div>
+        <div class="tabs" role="tablist">
+          <button class="tab active" id="tab-input" role="tab">入力</button>
+          <button class="tab" id="tab-result" role="tab">結果</button>
+        </div>
+
+        <div id="pane-input">
+          <div class="card">
+            <label class="field">
+              <span>あなたの名前</span>
+              <input id="in-name" type="text" maxlength="20" placeholder="名前を入力" />
+            </label>
+            <p class="hint">
+              空いている時間帯を押してください。押した時間帯とそれ以降がすべて選ばれます。選ばれている時間帯を押すと、そこから後ろが解除されます。
+            </p>
+            <div id="input-table"></div>
+            <p class="error" id="input-error"></p>
+            <div class="save-row">
+              <span class="save-state" id="save-state"></span>
+              <button class="btn primary" id="btn-save">回答を保存</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="pane-result" hidden>
+          <div class="card" id="result-top"></div>
+          <div class="card">
+            <div id="result-person-wrap">
+              <p class="hint" style="margin-top: 0">選んだ人が空いている時間帯の色が変わります。</p>
+              <div id="result-person" class="pchips"></div>
+              <div id="result-legend" class="legend"></div>
+            </div>
+            <div id="result-table"></div>
+            <div id="result-detail" class="detail"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
